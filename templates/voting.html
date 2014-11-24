@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Trello Voting System</title>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+  </head>
+
+  <body>
+
+    <div class="container">
+      <div class="header header-fixed-top">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="/">Home</a></li>
+            <li role="presentation"><a href="#">About</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <h1 class="text-muted"><a href="/">Trello Voting System</a></h1>
+      </div>
+      <br/>
+      <div class="row" style="height: 65px;">
+        <h3 style="display: block;">
+          Votes: <span id="total_votes" original-votes="{{ votes }}">{{ votes }}</span>
+          {% if not showall %}
+            <span style="float: right; display: inline; margin-left: 5px;"><a href="#"><button type="button" class="btn btn-success submit-vote"><i class="fa fa-upload"></i> Submit</button></a></span>
+          {% endif %}
+          <span style="float: right; display: inline; margin-left: 5px;"><a href="/update/{{ user_id }}/"><button type="button" class="btn btn-primary"><i class="fa fa-refresh"></i> Update</button></a></span>
+          <span style="float: right; display: inline; margin-left: 5px;"><a href="#"><button type="button" class="btn btn-primary showall"><i class="fa fa-eye"></i> View all</button></a></span>
+        </h3>
+      </div>
+      <br/>
+
+      <div class="row grid span4" id="sortable_grid">
+        <div class="column span6">
+          {% for card in cards %}
+            <div class="well span2 tile card" original-votes="{{ card['votes'] }}" id="{{ card['id'] }}" name="{{ card['name'] }}" style="margin-left:0;display:block;">
+              <a href="http://trello.com/c/{{ card['shortLink'] }}/" target="_blank" style="color:#777777;" id="subcard">
+                {{ card['name'] }}
+              </a>
+              {% for tag in card['hashtags'] %}
+                <a href="#" class="_{{ tag }} tag"><b>#{{ tag }}</b></a>
+              {% endfor %}
+              <a id="vote" href="#" style="float: right; margin-right: 20px; color: black;"><span>{{ card['votes'] }}</span> <i class="fa fa-thumbs-o-up"></i></a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <footer style="al" class="footer">
+        <center>© 3πR Solutions 2014</center>
+      </footer>
+
+    </div> <!-- /container -->  
+    <script type="text/javascript">
+      $('div.card').click(function() {
+        if($(this).attr('selected')) {
+          $(this).css("background-color", "#f5f5f5");
+          $(this).find('a').css("color", "#777777");
+          $(this).find('a.tag').css("color", "#337ab7");
+          $(this).find('a > i').css("color", "black");
+          $(this).attr('selected', false);
+          $(this).find('a > i').text
+          $(this).find('a#vote > span').text(parseInt($(this).attr('original-votes')));
+        } else {
+          $(this).css("background-color", "#5cb85c");
+          $(this).find('a').css("color", "white");
+          $(this).find('a > i').css("color", "white");
+          $(this).attr('selected', true);
+          $(this).find('a#vote > span').text(parseInt($(this).attr('original-votes'))+1);
+        }
+        $('#total_votes').text(parseInt($('#total_votes').attr('original-votes')) + $('[selected]').size())
+      });
+
+      $('.tag').click(function(){
+        if($('.tag').filter(':hidden').size() == 0) {
+          full_class = $(this).attr('class')
+          $('.tile').hide();
+          $('.' + full_class.substr(0, full_class.length - 4)).parent().toggle();          
+        } else {
+          $('div.tile').show();
+        }
+      });
+
+      $('.showall').click(function  () {
+        $('div.tile').show();
+      });
+
+      $('.submit-vote').click(function() {
+        console.log('clicked... posting!');
+        $.post('/vote/{{ user_id }}/', {'ids': '["' + $('[selected]').map(function(i, elem){return elem.id}).get().join('", "') + '"]'})
+          .done(function( data ) {
+            console.log('done!');
+            window.location.replace("/vote/{{ user_id }}/?showall=true");
+          });
+      });
+    </script>
+  </body>
+</html>

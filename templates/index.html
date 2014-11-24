@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Trello Voting System</title>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+
+    <div class="container">
+      <div class="header">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation" class="active"><a href="#">Home</a></li>
+            <li role="presentation"><a href="#">About</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <h1 class="text-muted"><a href="/">Trello Voting System</a></h1>
+      </div>
+      <br/>
+      <br/>
+
+      <div class="jumbotron">
+        <h1>No more long sprint meetings</h1>
+        <p class="lead">Do your sprint planning asynchronously. Each team member votes on the top priority tasks on the time that's best for each one. Authorize the application and paste the token below.</p>
+        <div class="row">
+          <div class="col-lg-3">
+            <p><a class="btn btn-lg btn-success" href="{{url}}" target="_blank" role="button">Authorize app in Trello</a></p>
+          </div><!-- /.col-lg-3 -->
+        </div><!-- /.row -->
+        <div class="row">
+          <form action="/create/" method="post">
+            <div class="col-lg-6 token" style="display:none;">
+              <label for="token">Paste token here</label>
+              <input type="text" id="token" name="token" class="form-control token-input"/>
+              <span><a href="#" class="btn btn-default token-ready">Go!</a></span>
+            </div><!-- /.col-lg-6 -->
+            <div class="col-lg-2 board-selector" style="display:none;">
+              <label for="board">Select Board</label>
+              <select type="text" role="multiselect" name="board" id="board" class="form-control multiselect multiselect-icon">
+              </select>
+            </div><!-- /.col-lg-2 -->
+            <div class="col-lg-2 list-selector" style="display:none;">
+              <label for="list">Select List</label>
+              <select type="text" role="multiselect" name="list" id="list" class="form-control multiselect multiselect-icon">
+              </select>
+            </div><!-- /.col-lg-2 -->
+            <div class="col-lg-2 list-selector" style="display:none;">
+              <input type="submit" value="Start voting!" class="btn btn-primary token-ready" style="margin-top: 25px;"/>
+            </div><!-- /.col-lg-2 -->
+          </form>
+        </div><!-- /.row -->
+      </div>
+
+      <div class="row marketing">
+        <div class="col-lg-6">
+          <h4>Asynchronous</h4>
+          <p>Don't delay important decisions because you don't have space in the meeting room, or because one team member is sick and couldn't participate.</p>
+
+          <h4>Unbiased</h4>
+          <p>Let each team member present its opinion unbiased from other ones.</p>
+        </div>
+
+        <div class="col-lg-6">
+          <h4>Awesome</h4>
+          <p>Give more power to the already amazing Trello platform. Using their API we can do even more awesome things and turn development more fun.</p>
+          <h4>Fast</h4>
+          <p>By doing the work asynchronously you can save some valuable developer time.</p>
+        </div>
+      </div>
+
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <footer style="al" class="footer">
+        <center>© 3πR Solutions 2014</center>
+      </footer>
+
+    </div> <!-- /container -->  
+    <script type="text/javascript">
+      $('.btn-success').click(function() {
+        $('.token').show()
+      });
+
+      $('.token-ready').click(function() {
+        $.get('/boards/?token=' + $('.token-input').val(), function (data) {
+          $.each(JSON.parse(data), function(key, value) {
+            $('#board')
+              .append($("<option></option>")
+              .attr("value", value['id'])
+              .text(value['name'])); 
+          });
+          $('.board-selector').show();
+        });
+      });
+
+      $('#board').change(function(){
+        $.get('/lists/?token=' + $('.token-input').val() + '&board_id=' + $('#board').val(), function (data) {
+          $('#list').empty();
+          $.each(JSON.parse(data), function(key, value) {
+            $('#list')
+              .append($("<option></option>")
+              .attr("value", value['id'])
+              .text(value['name'])); 
+          });
+          $('div.list-selector').show();
+        });
+      });
+    </script>
+  </body>
+</html>
